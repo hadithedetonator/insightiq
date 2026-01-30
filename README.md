@@ -431,6 +431,39 @@ curl -X POST http://localhost:3001/api/auth/register \
 
 ## ☁️ Deployment (AWS ECS)
 
+### Docker Support
+
+This application is containerized using Docker. You can run it locally with `docker-compose` or deploy built images to ECS.
+
+#### Local Development with Docker
+Ensure Docker Desktop is running.
+
+```bash
+# Option 1: Using Docker Compose (Recommended)
+docker compose up --build
+
+# Option 2: Using Helper Script (If compose is missing)
+./start-docker.sh
+```
+
+#### Building for Production (EC2/ECS)
+
+1.  **Backend Image**:
+    ```bash
+    # Run from root directory
+    docker build -f backend/Dockerfile -t insightiq-backend .
+    ```
+
+2.  **Frontend Image**:
+    *Requires build argument for API URL.*
+    ```bash
+    # Run from root directory
+    docker build -f frontend/Dockerfile \
+      --build-arg NEXT_PUBLIC_API_URL=https://api.your-production-url.com/api \
+      -t insightiq-frontend .
+    ```
+
+### AWS ECS Configuration
 The platform is optimized for horizontal scaling on AWS ECS:
 - **Container Port**: 3000 (standardized)
 - **Health Check**: Endpoint at `/ping`
