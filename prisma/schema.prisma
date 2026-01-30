@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleType {
+  ADMIN
+  WORKSPACE_OWNER
+  VIEWER
+}
+
+enum PipelineStatus {
+  QUEUED
+  INGESTING
+  VALIDATING
+  ANALYZING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  password      String
+  name          String?
+  role          RoleType        @default(VIEWER)
+  workspaces    WorkspaceUser[]
+  aiRequests    AIRequest[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Workspace {
+  id          String          @id @default(uuid())
+  name        String
+  slug        String          @unique
+  users       WorkspaceUser[]
+  datasets    Dataset[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model WorkspaceUser {
+  id          String    @id @default(uuid())
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  role        RoleType  @default(VIEWER)
+
+  @@unique([userId, workspaceId])
+}
+
+model Dataset {
+  id          String         @id @default(uuid())
+  name        String
+  description String?
+  workspaceId String
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id])
+  records     Record[]
+  aiRequests  AIRequest[]
+  logs        PipelineLog[]
+  status      PipelineStatus @default(QUEUED)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Record {
+  id        String   @id @default(uuid())
+  datasetId String
+  dataset   Dataset  @relation(fields: [datasetId], references: [id])
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model AIRequest {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  datasetId      String
+  dataset        Dataset  @relation(fields: [datasetId], references: [id])
+  prompt         String
+  response       Json
+  tokenUsage     Int      @default(0)
+  executionTime  Int      @default(0) // in ms
+  createdAt      DateTime @default(now())
+}
+
+model PipelineLog {
+  id         String         @id @default(uuid())
+  datasetId  String
+  dataset    Dataset        @relation(fields: [datasetId], references: [id])
+  event      String
+  status     PipelineStatus
+  details    String?
+  createdAt  DateTime       @default(now())
+}
