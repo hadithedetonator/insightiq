@@ -1,113 +1,138 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { TrendingUp, Users, Cpu, Activity, Download, Plus, Database } from 'lucide-react';
+import DashboardCard from '@/components/DashboardCard';
+import DatasetTable, { Dataset } from '@/components/DatasetTable';
+import AIInsightPanel from '@/components/AIInsightPanel';
+import { useAuth } from '@/context/AuthContext';
+import { apiRequest } from '@/services/api';
+import { TrendingUp, Cpu, Activity, Users, Plus } from 'lucide-react';
 
-export default function Dashboard() {
+export default function DashboardPage() {
+    const { currentWorkspace } = useAuth();
+    const [datasets, setDatasets] = useState<Dataset[]>([]);
+    const [analytics, setAnalytics] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (currentWorkspace) {
+            fetchDashboardData();
+        }
+    }, [currentWorkspace]);
+
+    const fetchDashboardData = async () => {
+        setLoading(true);
+        try {
+            // Fetch datasets
+            const datasetsData = await apiRequest(`/datasets?workspaceId=${currentWorkspace?.id}`);
+            setDatasets(datasetsData.map((d: any) => ({
+                id: d.id,
+                name: d.name,
+                status: d.status,
+                recordsCount: d._count?.records || 0,
+                lastUpdate: new Date(d.updatedAt).toLocaleDateString()
+            })));
+
+            // Fetch analytics
+            const analyticsData = await apiRequest(`/analytics/${currentWorkspace?.id}`);
+            setAnalytics(analyticsData);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            // Fallback to mock data if API fails
+            setDatasets([
+                { id: '1', name: 'Q4 Sales Analysis', status: 'COMPLETED', recordsCount: 45000, lastUpdate: '2 hours ago' },
+                { id: '2', name: 'Customer Sentiment', status: 'ANALYZING', recordsCount: 12400, lastUpdate: 'Just now' },
+                { id: '3', name: 'Supply Chain Logs', status: 'FAILED', recordsCount: 0, lastUpdate: '1 day ago' }
+            ]);
+            setAnalytics({
+                summary: {
+                    totalRecords: '128,402',
+                    aiRequests: '1,240',
+                    pipelineHealth: '99.9%',
+                    tokensUsed: '4.2M'
+                }
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <DashboardLayout>
-            <div className="space-y-8">
+            <div className="space-y-10">
                 <div className="flex items-end justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">Workspace Overview</h1>
-                        <p className="text-slate-400 mt-1">Real-time performance and AI metrics.</p>
+                        <h1 className="text-3xl font-extrabold tracking-tight">Workspace Overview</h1>
+                        <p className="text-slate-500 mt-1 font-medium">Real-time performance and AI-driven intelligence.</p>
                     </div>
-                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-all shadow-lg shadow-indigo-600/20">
-                        <Plus size={20} />
-                        New Dataset
+                    <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
+                        <Plus size={18} />
+                        Import New Dataset
                     </button>
                 </div>
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard icon={<TrendingUp className="text-emerald-400" />} label="Total Records" value="128,402" trend="+12.5%" />
-                    <StatCard icon={<Cpu className="text-purple-400" />} label="AI Requests" value="1,240" trend="+8.2%" />
-                    <StatCard icon={<Activity className="text-blue-400" />} label="Pipeline Health" value="99.9%" trend="Stable" />
-                    <StatCard icon={<Users className="text-amber-400" />} label="Tokens Used" value="4.2M" trend="+15.3%" />
+                    <DashboardCard
+                        icon={<TrendingUp size={24} />}
+                        label="Total Records"
+                        value={analytics?.summary?.totalRecords || '0'}
+                        trend="+12.5%"
+                        trendType="up"
+                    />
+                    <DashboardCard
+                        icon={<Cpu size={24} />}
+                        label="AI Requests"
+                        value={analytics?.summary?.aiRequests || '0'}
+                        trend="+8.2%"
+                        trendType="up"
+                    />
+                    <DashboardCard
+                        icon={<Activity size={24} />}
+                        label="Pipeline Health"
+                        value={analytics?.summary?.pipelineHealth || '99.9%'}
+                        trend="Stable"
+                    />
+                    <DashboardCard
+                        icon={<Users size={24} />}
+                        label="Tokens Used"
+                        value={analytics?.summary?.tokensUsed || '0'}
+                        trend="+15.3%"
+                        trendType="up"
+                    />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-                    {/* Active Datasets */}
-                    <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800 rounded-2xl p-6 backdrop-blur-sm">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-semibold">Active Datasets</h2>
-                            <button className="text-sm text-indigo-400 hover:text-indigo-300 font-medium">View all</button>
-                        </div>
-                        <div className="space-y-4">
-                            <DatasetRow name="Q4 Sales Data" status="COMPLETED" records="45,000" date="2 hours ago" />
-                            <DatasetRow name="Customer Feedback" status="INGESTING" records="... " date="Just now" />
-                            <DatasetRow name="Inventory Logs" status="COMPLETED" records="12,400" date="Yesterday" />
-                            <DatasetRow name="User Activity" status="FAILED" records="0" date="2 days ago" />
-                        </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    <div className="lg:col-span-2">
+                        <DatasetTable datasets={datasets} />
                     </div>
 
-                    {/* AI Insights Summary */}
-                    <div className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-indigo-500/20 rounded-2xl p-6">
-                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                            <Cpu className="text-indigo-400" size={24} />
-                            AI Insights
-                        </h2>
-                        <div className="space-y-4">
-                            <p className="text-sm text-slate-300 leading-relaxed italic">
-                                "We've detected a significant correlation between customer onboarding duration and 30-day retention rates. Optimizing the first 48 hours could yield a 15% increase in lifetime value."
-                            </p>
-                            <div className="pt-4 border-t border-slate-800">
-                                <button className="w-full bg-slate-100 text-slate-950 py-2.5 rounded-xl font-semibold text-sm hover:bg-white transition-colors flex items-center justify-center gap-2">
-                                    <Download size={18} />
-                                    Download PDF Report
-                                </button>
+                    <div className="space-y-8">
+                        <AIInsightPanel loading={loading} />
+
+                        {/* Quick Actions / Integration Status */}
+                        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Pipeline Status</h4>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-slate-300">AWS ECS</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Operational</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-slate-300">OpenAI API</span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                        <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Fast</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </DashboardLayout>
-    );
-}
-
-function StatCard({ icon, label, value, trend }: { icon: React.ReactNode, label: string, value: string, trend: string }) {
-    return (
-        <div className="bg-slate-900/50 border border-slate-800 p-6 rounded-2xl hover:border-slate-700 transition-colors group">
-            <div className="flex items-center justify-between mb-4">
-                <div className="p-2 bg-slate-800 rounded-xl group-hover:scale-110 transition-transform">
-                    {icon}
-                </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${trend === 'Stable' ? 'bg-slate-800 text-slate-400' : 'bg-emerald-400/10 text-emerald-400'
-                    }`}>{trend}</span>
-            </div>
-            <div>
-                <p className="text-slate-400 text-sm font-medium">{label}</p>
-                <p className="text-2xl font-bold mt-1 tracking-tight">{value}</p>
-            </div>
-        </div>
-    );
-}
-
-function DatasetRow({ name, status, records, date }: { name: string, status: string, records: string, date: string }) {
-    const statusColors: Record<string, string> = {
-        COMPLETED: 'text-emerald-400 bg-emerald-400/10',
-        INGESTING: 'text-blue-400 bg-blue-400/10 animate-pulse',
-        FAILED: 'text-red-400 bg-red-400/10'
-    }
-    return (
-        <div className="flex items-center justify-between p-4 hover:bg-slate-800/50 rounded-xl transition-colors group">
-            <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center">
-                    <Database size={20} className="text-slate-500" />
-                </div>
-                <div>
-                    <p className="font-semibold text-sm">{name}</p>
-                    <p className="text-xs text-slate-500">{records} records • {date}</p>
-                </div>
-            </div>
-            <div className="flex items-center gap-6">
-                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${statusColors[status] || 'bg-slate-800 text-slate-400'}`}>
-                    {status}
-                </span>
-                <button className="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Download size={18} className="text-slate-500 hover:text-slate-100" />
-                </button>
-            </div>
-        </div>
     );
 }

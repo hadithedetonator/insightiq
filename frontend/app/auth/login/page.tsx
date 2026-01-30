@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { login } = useAuth();
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -22,9 +24,7 @@ export default function Login() {
                 body: JSON.stringify({ email, password }),
             });
 
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            router.push('/dashboard');
+            login(data.token, data.user, data.workspaces || []);
         } catch (err: any) {
             setError(err.message || 'Login failed. Please check your credentials.');
         } finally {

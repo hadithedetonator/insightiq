@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiRequest } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -10,6 +11,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { login } = useAuth();
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -23,9 +25,7 @@ export default function Register() {
                 body: JSON.stringify({ name, email, password }),
             });
 
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            router.push('/dashboard');
+            login(data.token, data.user, data.workspaces || []);
         } catch (err: any) {
             setError(err.message || 'Registration failed. Please try again.');
         } finally {
