@@ -25,6 +25,8 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/datasets', require('./routes/dataset.routes'));
 app.use('/api/reports', require('./routes/report.routes'));
 app.use('/api/analytics', require('./routes/analytics.routes'));
+app.use('/api/workspaces', require('./routes/workspace.routes'));
+app.use('/api/users', require('./routes/user.routes'));
 
 app.listen(PORT, () => {
     console.log(`InsightIQ Backend running on port ${PORT}`);

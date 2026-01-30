@@ -8,6 +8,10 @@ interface ProtectedRouteProps {
     allowedRoles?: string[];
 }
 
+/**
+ * ProtectedRoute component that enforces authentication and role-based access control.
+ * Platform Admins are globally allowed to pass through any protected route.
+ */
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
     const { user, loading } = useAuth();
     const router = useRouter();
@@ -16,8 +20,11 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         if (!loading) {
             if (!user) {
                 router.push("/auth/login");
-            } else if (allowedRoles && !allowedRoles.includes(user.role)) {
-                router.push("/dashboard");
+            } else if (allowedRoles) {
+                // Admins bypass role checks globally
+                if (user.role !== 'ADMIN' && !allowedRoles.includes(user.role)) {
+                    router.push("/dashboard");
+                }
             }
         }
     }, [user, loading, router, allowedRoles]);
@@ -30,8 +37,9 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
         );
     }
 
-    if (allowedRoles && !allowedRoles.includes(user.role)) {
-        return null;
+    // Server-side check parity for flickering
+    if (allowedRoles && user.role !== 'ADMIN' && !allowedRoles.includes(user.role)) {
+        return null; // Side effect above will redirect
     }
 
     return <>{children}</>;

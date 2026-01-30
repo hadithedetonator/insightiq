@@ -10,6 +10,7 @@ import {
     LogOut,
     Users,
     Globe,
+    PieChart,
     Cpu,
     FileText,
     Activity,
@@ -51,56 +52,32 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             allowedRoles: ['ADMIN']
         },
         {
-            label: 'Workspaces',
+            label: 'All Workspaces',
             icon: <Globe size={20} />,
             href: '/admin/workspaces',
             allowedRoles: ['ADMIN']
         },
-        {
-            label: 'AI Usage Logs',
-            icon: <BarChart3 size={20} />,
-            href: '/admin/usage',
-            allowedRoles: ['ADMIN']
-        },
-        {
-            label: 'Pipelines',
-            icon: <Activity size={20} />,
-            href: '/admin/pipelines',
-            allowedRoles: ['ADMIN']
-        },
-        // Owner specific
+
+
         {
             label: 'Datasets',
             icon: <Database size={20} />,
             href: '/datasets',
-            allowedRoles: ['ADMIN', 'WORKSPACE_OWNER']
+            allowedRoles: ['WORKSPACE_OWNER']
         },
         {
-            label: 'AI Analysis',
-            icon: <Cpu size={20} />,
-            href: '/analysis',
-            allowedRoles: ['ADMIN', 'WORKSPACE_OWNER']
+            label: 'Team Members',
+            icon: <Users size={20} />,
+            href: '/workspace/members',
+            allowedRoles: ['WORKSPACE_OWNER']
         },
-        // Common Reports
+
+        // Viewer & Everyone
         {
-            label: 'Business Reports',
+            label: 'Reports & Downloads',
             icon: <FileText size={20} />,
             href: '/reports',
-            allowedRoles: ['ADMIN', 'WORKSPACE_OWNER', 'VIEWER']
-        },
-        // Viewer specific action
-        {
-            label: 'Request AI Summary',
-            icon: <Sparkles size={20} />,
-            href: '/reports?action=request',
-            allowedRoles: ['VIEWER']
-        },
-        // Shared Settings
-        {
-            label: 'Settings',
-            icon: <Settings size={20} />,
-            href: '/settings',
-            allowedRoles: ['ADMIN', 'WORKSPACE_OWNER', 'VIEWER']
+            allowedRoles: ['VIEWER', 'WORKSPACE_OWNER']
         },
     ];
 
@@ -119,8 +96,8 @@ export default function Sidebar({ onLogout }: SidebarProps) {
                         key={item.href}
                         href={item.href}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${pathname === item.href
-                                ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20'
-                                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900 shadow-sm'
+                            ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20'
+                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900 shadow-sm'
                             }`}
                     >
                         {item.icon}

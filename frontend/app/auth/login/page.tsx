@@ -94,7 +94,7 @@ export default function Login() {
                 </form>
 
                 <p className="text-center text-slate-500 text-sm mt-8">
-                    Don't have an account? <Link href="/auth/register" className="text-indigo-400 font-bold hover:underline">Sign up</Link>
+                    Don&apos;t have an account? <Link href="/auth/register" className="text-indigo-400 font-bold hover:underline">Sign up</Link>
                 </p>
             </div>
         </div>

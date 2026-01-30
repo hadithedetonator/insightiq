@@ -44,13 +44,22 @@ model Workspace {
   updatedAt   DateTime        @updatedAt
 }
 
+enum InvitationStatus {
+  PENDING
+  REQUESTED
+  ACCEPTED
+}
+
 model WorkspaceUser {
-  id          String    @id @default(uuid())
+  id          String           @id @default(uuid())
   userId      String
   workspaceId String
-  user        User      @relation(fields: [userId], references: [id])
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  role        RoleType  @default(VIEWER)
+  user        User             @relation(fields: [userId], references: [id])
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role        RoleType         @default(VIEWER)
+  status      InvitationStatus @default(ACCEPTED)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
   @@unique([userId, workspaceId])
 }
@@ -60,7 +69,7 @@ model Dataset {
   name        String
   description String?
   workspaceId String
-  workspace   Workspace      @relation(fields: [workspaceId], references: [id])
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   records     Record[]
   aiRequests  AIRequest[]
   logs        PipelineLog[]
@@ -72,7 +81,7 @@ model Dataset {
 model Record {
   id        String   @id @default(uuid())
   datasetId String
-  dataset   Dataset  @relation(fields: [datasetId], references: [id])
+  dataset   Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   data      Json
   createdAt DateTime @default(now())
 }
@@ -82,7 +91,7 @@ model AIRequest {
   userId         String
   user           User     @relation(fields: [userId], references: [id])
   datasetId      String
-  dataset        Dataset  @relation(fields: [datasetId], references: [id])
+  dataset        Dataset  @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   prompt         String
   response       Json
   tokenUsage     Int      @default(0)
@@ -93,7 +102,7 @@ model AIRequest {
 model PipelineLog {
   id         String         @id @default(uuid())
   datasetId  String
-  dataset    Dataset        @relation(fields: [datasetId], references: [id])
+  dataset    Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   event      String
   status     PipelineStatus
   details    String?

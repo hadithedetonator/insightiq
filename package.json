@@ -11,7 +11,13 @@
         "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
         "install:all": "npm install",
         "prisma:generate": "npm run prisma:generate -w backend",
-        "prisma:push": "npm run prisma:push -w backend"
+        "prisma:push": "npm run prisma:push -w backend",
+        "build:frontend": "npm run build -w frontend",
+        "build:backend": "echo 'No backend build needed'",
+        "build": "concurrently \"npm run build:frontend\" \"npm run build:backend\"",
+        "start:backend": "npm run start -w backend",
+        "start:frontend": "npm run start -w frontend",
+        "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
     },
     "devDependencies": {
         "concurrently": "^8.2.2"

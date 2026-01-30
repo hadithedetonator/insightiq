@@ -19,16 +19,19 @@ const register = async (req, res) => {
             }
         });
 
-        // Create a default workspace for the user
-        const workspace = await prisma.workspace.create({
-            data: {
-                name: `${name || 'My'} Workspace`,
-                slug: `workspace-${Date.now()}`,
-                users: {
-                    create: { userId: user.id, role: 'WORKSPACE_OWNER' }
+        // Create a default workspace only for non-admin users
+        let workspace = null;
+        if (user.role !== 'ADMIN') {
+            workspace = await prisma.workspace.create({
+                data: {
+                    name: `${name || 'My'} Workspace`,
+                    slug: `workspace-${Date.now()}`,
+                    users: {
+                        create: { userId: user.id, role: 'WORKSPACE_OWNER', status: 'ACCEPTED' }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role },
@@ -66,4 +69,32 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { register, login };
+const getMe = async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.id },
+            include: {
+                workspaces: {
+                    where: { status: 'ACCEPTED' },
+                    include: { workspace: true }
+                }
+            }
+        });
+
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            },
+            workspaces: user.workspaces
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { register, login, getMe };

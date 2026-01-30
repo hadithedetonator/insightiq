@@ -35,7 +35,7 @@ export default function AIInsightPanel({ insight, loading }: AIInsightPanelProps
                 ) : (
                     <>
                         <p className="text-slate-300 leading-relaxed font-medium mb-8">
-                            "{insight || defaultInsight}"
+                            &quot;{insight || defaultInsight}&quot;
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-800/50">

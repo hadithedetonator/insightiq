@@ -16,6 +16,7 @@ export default function DatasetsPage() {
         if (currentWorkspace) {
             fetchDatasets();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentWorkspace]);
 
     const fetchDatasets = async () => {
@@ -79,7 +80,7 @@ export default function DatasetsPage() {
                             />
                         </div>
 
-                        <DatasetTable datasets={datasets} />
+                        <DatasetTable datasets={datasets} onRefresh={fetchDatasets} />
                     </div>
                 </div>
             </DashboardLayout>

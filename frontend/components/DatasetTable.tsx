@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
-import { Database, Download, ExternalLink, MoreVertical } from 'lucide-react';
+import { Database, Download, Sparkles, MoreVertical } from 'lucide-react';
+import { apiRequest } from '@/services/api';
 
 export interface Dataset {
     id: string;
@@ -12,10 +13,10 @@ export interface Dataset {
 
 interface DatasetTableProps {
     datasets: Dataset[];
-    onAction?: (id: string, action: string) => void;
+    onRefresh: () => void;
 }
 
-export default function DatasetTable({ datasets, onAction }: DatasetTableProps) {
+export default function DatasetTable({ datasets, onRefresh }: DatasetTableProps) {
     const statusConfig = {
         COMPLETED: { color: 'text-emerald-400 bg-emerald-400/10', label: 'Success' },
         INGESTING: { color: 'text-blue-400 bg-blue-400/10 animate-pulse', label: 'Ingesting' },
@@ -23,6 +24,18 @@ export default function DatasetTable({ datasets, onAction }: DatasetTableProps) 
         ANALYZING: { color: 'text-amber-400 bg-amber-400/10', label: 'AI Analysis' },
         QUEUED: { color: 'text-slate-400 bg-slate-400/10', label: 'Queued' },
         FAILED: { color: 'text-red-400 bg-red-400/10', label: 'Failed' },
+    };
+
+    const handleTriggerAI = async (datasetId: string) => {
+        try {
+            await apiRequest('/analytics/trigger', {
+                method: 'POST',
+                body: JSON.stringify({ datasetId }),
+            });
+            onRefresh();
+        } catch (error) {
+            console.error('Failed to trigger AI', error);
+        }
     };
 
     return (
@@ -56,7 +69,7 @@ export default function DatasetTable({ datasets, onAction }: DatasetTableProps) 
                                             </div>
                                             <div>
                                                 <p className="font-semibold text-sm text-slate-200 group-hover:text-white">{dataset.name}</p>
-                                                <p className="text-[10px] text-slate-500 font-medium">JSON Source • {dataset.id.slice(0, 8)}</p>
+                                                <p className="text-[10px] text-slate-500 font-medium italic">JSON Source • {dataset.id.slice(0, 8)}</p>
                                             </div>
                                         </div>
                                     </td>
@@ -73,11 +86,15 @@ export default function DatasetTable({ datasets, onAction }: DatasetTableProps) 
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-indigo-400 outline-none transition-colors">
-                                                <Download size={16} />
+                                            <button
+                                                title="Trigger AI Analysis"
+                                                onClick={() => handleTriggerAI(dataset.id)}
+                                                className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-indigo-400 outline-none transition-colors"
+                                            >
+                                                <Sparkles size={16} />
                                             </button>
                                             <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors">
-                                                <MoreVertical size={16} />
+                                                <Download size={16} />
                                             </button>
                                         </div>
                                     </td>

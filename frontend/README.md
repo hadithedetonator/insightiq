@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# InsightIQ Frontend
 
-## Getting Started
+A premium Next.js 14 dashboard for AI-powered analytics.
 
-First, run the development server:
+## 🏗️ Architecture
+
+- **Next.js 14 (App Router)**: Modern routing and server components.
+- **Tailwind CSS**: Sleek, enterprise-grade dark mode UI.
+- **AuthContext**: Centralized state for JWT, user profile, and workspace switching.
+- **ProtectedRoute**: Higher-order component for role-based access control.
+
+## 🚀 Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🗺️ Page Mapping
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/dashboard`: Unified overview showing AI insights and dataset status.
+- `/datasets`: Data management, upload, and pipeline monitoring.
+- `/workspace/members`: Team management and invitation portal.
+- `/reports`: Archive of AI-generated insights and export options.
+- `/admin`: Platform-wide governance (Admin role only).
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 🔑 Role Enforcements
 
-## Learn More
+- **ADMIN**: Access to `/admin` and all platform logs.
+- **WORKSPACE_OWNER**: Full control over datasets, team invites, and analysis.
+- **VIEWER**: Read-only access to dashboards and reports.
 
-To learn more about Next.js, take a look at the following resources:
+## 🔄 Workspace Switching
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The `WorkspaceSelector` component in the header updates the `currentWorkspace` in `AuthContext`, which automatically re-triggers data fetching on all active pages to ensure complete data isolation.

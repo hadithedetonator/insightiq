@@ -1,10 +1,9 @@
 "use client";
 import React from 'react';
-import { Search, Bell } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from './Sidebar';
-import WorkspaceSelector from './WorkspaceSelector';
 import ProtectedRoute from './ProtectedRoute';
+import InvitationBell from './InvitationBell';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { user, logout } = useAuth();
@@ -24,22 +23,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <main className="flex-1 overflow-y-auto">
                     <header className="h-16 border-b border-slate-800 flex items-center justify-between px-8 sticky top-0 bg-slate-950/80 backdrop-blur-md z-10">
                         <div className="flex items-center gap-6">
-                            <WorkspaceSelector />
-                            <div className="relative w-72 lg:w-96 group">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
-                                <input
-                                    type="text"
-                                    placeholder="Search datasets, reports..."
-                                    className="w-full bg-slate-900 border border-slate-800 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all border-none"
-                                />
-                            </div>
+                            <h2 className="text-lg font-bold text-white">InsightIQ</h2>
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <button className="p-2 hover:bg-slate-900 rounded-full transition-colors relative">
-                                <Bell size={20} />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full ring-2 ring-slate-950"></span>
-                            </button>
+                            <InvitationBell />
 
                             <div className="flex items-center gap-3 ml-4 border-l border-slate-800 pl-6">
                                 <div className="text-right hidden sm:block">
